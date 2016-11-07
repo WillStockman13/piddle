@@ -18,8 +18,12 @@ if (process.env.NODE_ENV !== 'test') {
   // Don't log requests during testing
   app.use(morgan('dev'));
 }
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb'}));
+
+
 app.use(passport.initialize());
+
 
 app.use('/', express.static(path.join(__dirname, '../client/build')));
 

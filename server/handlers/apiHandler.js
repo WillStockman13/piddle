@@ -1,5 +1,7 @@
 const billController = require('../dbControllers/billController');
 const itemController = require('../dbControllers/itemController');
+const ocrCall = require('./ocrHandler/ocr');
+const fs = require('fs');
 
 /**
  * The logic functions to handle requests to API endpoints.
@@ -202,10 +204,24 @@ const updateItem = (request, response) => {
     });
 };
 
+const uploadReceipt = (req, res) => {
+
+  var base64Data = req.body.receipt.split('data:image/jpeg;base64,')
+  base64Data = base64Data[1];
+
+
+  fs.writeFile('server/handlers/ocrHandler/receipt.jpg', base64Data, 'base64', function(err) {
+    console.log(err);
+    ocrCall('server/handlers/ocrHandler/receipt.jpg', req, res);
+  });
+  
+}
+
 module.exports = {
   saveBill,
   getBill,
   getUserBills,
   updateBill,
   updateItem,
+  uploadReceipt
 };

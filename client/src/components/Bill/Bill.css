@@ -48,3 +48,8 @@
   outline: none;
   background:rgba(0,0,0,0);
 }
+
+.receipt-preview {
+  height: 300px;
+  width: 300px;
+}

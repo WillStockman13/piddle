@@ -54,3 +54,6 @@ yarn.lock
 
 # Documentation (run 'npm run doc' to build)
 docs/
+
+# API Key
+server/handlers/ocrHandler/API_KEY.js

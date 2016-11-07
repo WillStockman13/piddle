@@ -1,5 +1,6 @@
 import jwtDecode from 'jwt-decode';
 import React from 'react';
+import Dropzone from 'react-dropzone';
 import { withRouter, browserHistory } from 'react-router';
 import { round } from 'mathjs';
 import { Form, Well, Button } from 'react-bootstrap';
@@ -30,6 +31,7 @@ class Bill extends React.Component {
     this.claimBillItem = this.claimBillItem.bind(this);
     this.payForClaimedItems = this.payForClaimedItems.bind(this);
     this.copyShortLink = this.copyShortLink.bind(this);
+    this.uploadReceipt = this.uploadReceipt.bind(this);
 
     // Bill Item
     this.changeBillItem = this.changeBillItem.bind(this);
@@ -78,7 +80,8 @@ class Bill extends React.Component {
         percent: null,
         usePercent: false,
       },
-      shortLink: null
+      shortLink: null,
+      imageFiles: []
     };
 
     if (!token) {
@@ -583,6 +586,50 @@ class Bill extends React.Component {
     this.refs.textarea.select();
   }
 
+  uploadReceipt(imageFiles) {
+
+    this.setState({
+      imageFiles: imageFiles
+    });
+
+    const bill = this;
+
+    const jsonHeaders = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${this.state.token.raw}`,
+    };
+
+    var reader = new FileReader();
+    var file = imageFiles[0];
+
+    reader.readAsDataURL(file);
+
+    reader.onload = function(e) {
+      // var blob = base64ToBlob(e.target.result);
+
+      fetch(`http://localhost:3000/api/receipt`, {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify({
+          receipt: e.target.result
+        }),
+      })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data)
+        console.log(this)
+        bill.setState({
+          items: data
+        })
+      });
+
+    };
+
+  }
+
   /**
    * Render the component
    * @method
@@ -622,7 +669,26 @@ class Bill extends React.Component {
               id="createBillForm"
               ref={(c) => { this.createBillForm = c; }}
             >
+                
               <Well bsSize="lg">
+                <form className='join-form' ref='joinForm' autoComplete='off'>
+                  <Dropzone
+                    onDrop={this.uploadReceipt}
+                    className='dropzone'
+                    activeClassName='active-dropzone'
+                    multiple={false}
+                  >
+                    <a href='#'>Click here to upload your receipt!</a>
+                  </Dropzone>
+                  {this.state.imageFiles.length > 0 
+                    ? 
+                    <div>
+                      <div>{this.state.imageFiles.map((file) => <img className='receipt-preview' src={file.preview} /> )}</div>
+                    </div> 
+                    : 
+                    null
+                  }
+                </form>
                 <DescriptionField
                   changeDescriptionValue={this.changeDescriptionValue}
                   descriptionValue={this.state.description}
